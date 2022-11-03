@@ -1,0 +1,183 @@
+---
+permalink: task-configure-export-policies-for-clustered-data-ontap-to-allow-vaai-over-nfs.html 
+sidebar: sidebar 
+keywords: configure, export, policies, policy, compliance, vmware, vstorage, api, array, integration, vaai, storage, feature, nfs, server, ontap, svm, vserver, vstorage 
+summary: 'Sie müssen Exportrichtlinien konfigurieren, um Compliance zwischen VMware vStorage APIs for Array Integration (VAAI) Storage-Funktionen über den NFS-Server und NetApp Storage sicherzustellen. Bei ONTAP werden Volume-Exporte durch Exportrichtlinien eingeschränkt, die auf Storage Virtual Machines (SVMs, früher Vserver genannt) angewendet werden.' 
+---
+= Exportrichtlinien für ONTAP konfigurieren, um VAAI über NFS zu ermöglichen
+:allow-uri-read: 
+:icons: font
+:imagesdir: ./media/
+
+
+[role="lead"]
+Sie müssen Exportrichtlinien konfigurieren, um Compliance zwischen VMware vStorage APIs for Array Integration (VAAI) Storage-Funktionen über den NFS-Server und NetApp Storage sicherzustellen. Bei ONTAP werden Volume-Exporte durch Exportrichtlinien eingeschränkt, die auf Storage Virtual Machines (SVMs, früher Vserver genannt) angewendet werden.
+
+.Bevor Sie beginnen
+* NFSv4-Aufrufe müssen von den entsprechenden NFS-Volumes zulässig sein.
+* Der Root-Benutzer muss als primärer Benutzer beibehalten werden.
+* NFSv4 muss auf allen verbundenen übergeordneten Volumes zulässig sein.
+* Die Option für VAAI-Support muss auf dem jeweiligen NFS-Server eingestellt sein.
+
+
+Sie können unterschiedliche Exportrichtlinien für mehrere Bedingungen und Protokolle konfigurieren.
+
+.Schritte
+. Wenn keine Exportrichtlinie erstellt wird, erstellen Sie eine Exportrichtlinie für die SVM im Root-Volume des VMware ESXi Hosts, die den SVM-Namen, Richtliniennamen, Standardregelindex, -Protokoll usw. enthält:
++
+`vserver export-policy rule modify -vserver vserver name -policyname default -ruleindex rule index -protocol NFSv3\|NFSv4`
+
+. Ändern Sie die Exportrichtlinie, damit sowohl NFSv3- als auch NFSv4-Protokolle unter den folgenden Bedingungen zugelassen werden:
++
+** Sie müssen die Regel für die Exportrichtlinie für den jeweiligen ESX-Server und das Volume mit allen relevanten Zugriffsberechtigungen konfiguriert haben.
+** Sie müssen die Werte RW, RO und Superuser auf festgelegt haben `SYS` Oder `ANY` Für die Client-Übereinstimmung.
+** Sie müssen das NFSv3 und NFSv4-Protokoll zugelassen haben.
++
+Das Zugriffsprotokoll in der Exportrichtlinie ist wie folgt festgelegt:
+
++
+*** Zugriffsprotokoll = `nfs` (Um alle Versionen von NFS einzubeziehen)
+*** Zugriffsprotokoll = `nfsv3`, `nfsv4` (Zugriff auf NFSv3 für NFSv3-Datastore) und NFSv4 (Zugriff auf NFSv4.1 für Datastore).
++
+Mit den folgenden Befehlen werden die SVM-Details angezeigt und die Exportrichtlinie festgelegt:
+
++
+[listing]
+----
+cm3240c-rtp::> vol show -vserver vmware -volume vmware_VAAI -fields policy (volume
+show)
+vserver volume       policy         junction-path
+------- ------       -------        -------------
+vmware  vmware_VAAI  vmware_access  /VAAI
+----
+
+
++
+[listing]
+----
+cm3240c-rtp::> export-policy rule show -vserver vmware -policyname vmware_access-ruleindex 2(vserver export-policy rule show)
+
+Vserver: vmware
+Policy Name: vmware_access
+Rule Index: 1
+Access Protocol: nfs3,nfs4 (can also be nfs for NFSv3)
+Client Match Spec: 192.168.1.6
+RO Access Rule: sys
+RW Access Rule: sys
+User ID To Which Anonymous Users Are Mapped: 65534
+Superuser Security Flavors: sys
+Honor SetUID Bits In SETATTR: true
+Allow Creation of Devices: true
+----
+
+
++
+Richtlinienänderungen werden auf alle Volumes mit der entsprechenden Richtlinie angewendet und sind nicht auf NFS-Datenspeicher-Volumes beschränkt.
+
+. Ändern Sie die Exportrichtlinie, um den Superuser unter den folgenden Bedingungen als SYS zu setzen:
++
+** Sie müssen alle übergeordneten Volumes im Verbindungspfad mit Zugriffsberechtigung für das Root-Volume, den NFSv4-Zugriff und den VAAI-Zugriff auf das Verbindungs-Volume konfiguriert haben.
++
+Der Superuser des Root-Volumes für die SVM ist für den jeweiligen Client auf SYS gesetzt.
+
+** Sie müssen die Schreibrechte für das SVM-Root-Volume verweigert haben. Mit den folgenden Befehlen werden die SVM-Details angezeigt und die Exportrichtlinie festgelegt:
++
+[listing]
+----
+cm3240c-rtp::> vol show -vserver vmware -volume vmware_root -fields policy,
+junction-path (volume show)
+vserver volume policy  junction-path
+------- ------ ------- -------------
+vmware  vmware_root  root_policy /
+----
++
+[listing]
+----
+
+cm3240c-rtp::> export-policy rule show -vserver vmware -policyname root_policy
+-ruleindex 1 (vserver export-policy rule show)
+
+Vserver: vmware
+Policy Name: root_policy
+Rule Index: 1
+Access Protocol: nfs  <--- as in scenario 1, set to nfs or nfs3,nfs4
+Client Match Spec: 192.168.1.5
+RO Access Rule: sys
+RW Access Rule: never  <--- this can be never for security reasons
+User ID To Which Anonymous Users Are Mapped: 65534
+Superuser Security Flavors: sys   <--- this is required for VAAI to be set, even
+in the parent volumes like vsroot
+Honor SetUID Bits In SETATTR: true
+Allow Creation of Devices: true
+----
++
+Der Root-Benutzer wird beibehalten, da der Superuser auf SYS gesetzt ist. Daher kann der Root-Benutzer auf das Volume mit dem Verbindungspfad /VAAI zugreifen.
+
++
+Wenn in den Verbindungen zwischen dem Root-Volume und dem vmware_VAAI-Volume zusätzliche Volumes vorhanden sind, sollten diese Volumes eine Richtlinienregel für den jeweiligen Client haben, bei der der Superuser auf SYS oder ANY gesetzt ist.
+
++
+In den meisten Fällen verwendet das Root-Volume eine Richtlinie, deren Richtlinienname auf den Standardwert gesetzt ist.
+
++
+Jede Richtlinienänderung wird auf alle Volumes angewendet, die die entsprechende Richtlinie verwenden. Sie ist nicht auf das Root-Volume beschränkt.
+
+
+
+. VStorage Funktion aktivieren: `nfs modify -vserver vserver_name vmware -vstorage enabled`
++
+Für den NFS-Service auf der SVM muss die vStorage-Funktion aktiviert sein.
+
+. Überprüfen Sie, ob die vStorage Funktion aktiviert ist:
++
+`nfs show -fields vstorage`
+
++
+Die Ausgabe sollte angezeigt werden `enabled`:
+
++
+[listing]
+----
+cm3240c-rtp::> nfs show -fields vstorage
+vserver vstorage
+------- --------
+vmware  enabled
+----
+. Erstellen Sie die Exportrichtlinie:
++
+`vserver export-policy rule create`
+
++
+Mit den folgenden Befehlen wird die Regel für die Exportrichtlinie erstellt:
+
++
+[listing]
+----
+User1-vserver2::> protocol export-policy rule create -vserver vs1
+-policyname default -clientmatch 0.0.0.0/0 -rorule any -rwrule any -superuser
+any -anon 0
+
+User1-vserver2::> export-policy rule show vserver export-policy rule show)
+Virtual      Policy          Rule    Access   Client                RO
+Server       Name            Index   Protocol Match                 Rule
+------------ --------------- ------  -------- --------------------- ---------
+vs1          default         1       any      0.0.0.0/0             any
+
+User1-vserver2::>
+----
+. Exportrichtlinie anzeigen:
++
+`vserver export-policy show`
+
++
+Mit den folgenden Befehlen wird die Exportrichtlinie angezeigt:
+
++
+[listing]
+----
+User1-vserver2::> export-policy show (vserver export-policy show)
+Virtual Server   Policy Name
+---------------  -------------------
+vs1              default
+----
+

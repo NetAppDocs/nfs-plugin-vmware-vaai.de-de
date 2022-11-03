@@ -1,0 +1,14 @@
+---
+permalink: index.html 
+sidebar: sidebar 
+keywords: installation, guide, nfs, vaai, vmware, esxi, plug-in 
+summary: Softwarebibliothek, die die auf dem ESXi-Host installierten VMware Virtual Disk Libraries integriert. 
+---
+= NetApp NFS Plug-in für VMware VAAI Dokumentation
+:allow-uri-read: 
+:icons: font
+:imagesdir: ./media/
+
+
+[role="lead"]
+Dieses Plug-in ermöglicht höhere Performance-Klonvorgänge, die schneller abgeschlossen werden können. Und Sie erhalten eine Softwarebibliothek, in der die VMware Virtual Disk Libraries auf dem ESXi Host installiert sind.
