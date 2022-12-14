@@ -20,6 +20,7 @@ Sie müssen Exportrichtlinien konfigurieren, um Compliance zwischen VMware vStor
 * Die Option für VAAI-Support muss auf dem jeweiligen NFS-Server eingestellt sein.
 
 
+.Über diese Aufgabe
 Sie können unterschiedliche Exportrichtlinien für mehrere Bedingungen und Protokolle konfigurieren.
 
 .Schritte

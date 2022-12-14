@@ -22,15 +22,15 @@ NOTE: NFSv4.1 ist nur auf ONTAP 9.0 Systemen verfügbar und NFSv3 ist sowohl auf
 * VMware vSphere 7.0U1 muss verfügbar sein.
 
 
-Weitere Informationen zum Aktivieren von NFS und zum Einsatz von VMware vSphere finden Sie in den Handbüchern unter ,Schritt 10.
+Weitere Informationen zum Aktivieren von NFS und zum Einsatz von VMware vSphere finden Sie in den Handbüchern unter <<step10,Schritt 10>>.
 
 .Über diese Aufgabe
-* Wenn Sie das Plug-in über die VMware ESXi CLI installieren, beginnen Sie mit ,Schritt 1.
-* Wenn Sie das Plug-in über Virtual Storage Console für VMware vSphere (VSC) installieren, beginnen Sie mit ,Schritt 3.
+* Wenn Sie das Plug-in über die VMware ESXi CLI installieren, beginnen Sie mit <<step1,Schritt 1>>.
+* Wenn Sie das Plug-in über Virtual Storage Console für VMware vSphere (VSC) installieren, beginnen Sie mit <<step3,Schritt 3>>.
 +
-VSC ermöglicht VMware vStorage für NFS auf dem Storage Controller und ermöglicht VAAI auf dem ESXi Host, was Schritte sind ,1 Bis ,2 Dieses Verfahrens.
+VSC ermöglicht VMware vStorage für NFS auf dem Storage Controller und ermöglicht VAAI auf dem ESXi Host, was Schritte sind <<step1,1>> Bis <<step2,2>> Dieses Verfahrens.
 
-* Wenn Sie das Plug-in mithilfe von ONTAP Tools für VMware vSphere installieren, beginnen Sie mit ,Schritt 3.
+* Wenn Sie das Plug-in mithilfe von ONTAP Tools für VMware vSphere installieren, beginnen Sie mit <<step3,Schritt 3>>.
 
 
 *Verwendete IP-Adresskonventionen:*
@@ -424,6 +424,7 @@ https://library.netapp.com/ecm/ecm_download_file/ECMP1401220["Data ONTAP 8.2 –
 
 
 
+.Nachdem Sie fertig sind
 Nutzen Sie die NFS Plug-in-Funktionen für Speicherreservierung und Copy-Offload, um Routineaufgaben effizienter zu erledigen:
 
 * Erstellen Sie Virtual Machines im VMDK-Format (Thick Virtual Machine Disk) auf traditionellen NetApp Volumes oder FlexVol-Volumes und reservieren Sie während der Erstellung Speicherplatz für die Datei.
