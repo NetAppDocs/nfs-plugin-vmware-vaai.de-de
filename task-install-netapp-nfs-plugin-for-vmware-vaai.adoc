@@ -133,19 +133,58 @@ VSphere Client
 .. Laden Sie die neueste Software-Version für 2.0 und vSphere 7.0U1 und höher herunter.
 
 
-. Installieren Sie das Plug-in auf dem ESXi-Host mit folgendem Befehl:
+. Überprüfen Sie die Binärdatei mit dem signierten Bild und dem öffentlichen Schlüssel:
 +
-`esxcli software component apply -d /<tmp>/<or>/<some_path\>/<downloaded-plugin-file-version\>.zip`
+.. Laden Sie den folgenden Zip auf den herunter `/tmp` Ordner:
++
+`NetAppNasPlugin-<version>.Signed.zip`
 
 +
-Wo `<some_path>` Ist der Pfad zum Speicherort der heruntergeladenen Datei und `<downloaded-plugin-file-version>` Ist der Name der heruntergeladenen Datei.
+Dieser Zip enthält die folgenden Dateien:
 
-. Führen Sie die folgenden Befehle aus, um die Installation abzuschließen:
++
+*** `NetAppNasPlugin-<version>.zip`
+*** `NetAppNasPlugin-<version>.zip.sig`
+*** `csc-prod-CFSG-NFS-Plugin.pem`
+
+
+.. Beziehen Sie den öffentlichen Schlüssel aus der Zertifikatskette mit folgendem Befehl ein:
++
+`openssl x509 -in csc-prod-CFSG-NFS-Plugin.pem -pubkey -noout > csc-prod-CFSG-NFS-Plugin.pub`
+
++
+*** `csc-prod-CFSG-NFS-Plugin.pem` Ist die Zertifikatskette in `NetAppNasPlugin-<version>.Signed.zip`
+*** `csc-prod-CFSG-NFS-Plugin.pub` Ist ein öffentlicher Schlüssel
+
+
+.. Überprüfen Sie das signierte Bild mit dem öffentlichen Schlüssel:
++
+`openssl dgst -sha256 -verify csc-prod-CFSG-NFS-Plugin.pub -signature /tmp/ NetAppNasPlugin-<version>.zip.sig  /tmp/NetAppNasPlugin-<version>.zip`
+
++
+Wenn die Überprüfung erfolgreich ist, wird die folgende Ausgabe angezeigt:
+
++
+[listing]
+----
+Verified OK
+----
+
+
+. Installieren Sie das Plug-in auf dem ESXi-Host, indem Sie folgende Befehle ausführen:
++
+`/etc/init.d/vaai-nasd stop`
+
++
+`esxcli software component apply -d   /tmp/<some_path>/NetAppNasPlugin-<version>.zip`
+
 +
 `/etc/init.d/vaai-nasd start`
 
 +
-`/etc/init.d/vaai-nasd stop`
+** `<some_path>` Ist der Pfad zum Speicherort der heruntergeladenen Datei
+** `NetAppNasPlugin-<version>.zip` Ist im heruntergeladenen Zip enthalten
+
 
 . Überprüfen Sie, ob das Plug-in erfolgreich auf dem Host in der VMware ESXi-Befehlszeile installiert wurde:
 +
