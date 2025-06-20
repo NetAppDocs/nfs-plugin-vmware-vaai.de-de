@@ -20,4 +20,4 @@ sidebar:
     - title: Exportrichtlinien für ONTAP konfigurieren, um VAAI über NFS zu ermöglichen
       url: "/task-configure-export-policies-for-clustered-data-ontap-to-allow-vaai-over-nfs.html"
   - title: Rechtliche Hinweise
-    url: "/reference-legal-notices.html"
+    url: "/legal-notices.html"
